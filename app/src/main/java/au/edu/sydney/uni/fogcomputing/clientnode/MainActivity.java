@@ -13,6 +13,7 @@ import android.widget.Toast;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Scanner;
+import java.util.concurrent.TimeUnit;
 
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -27,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView display;
     private TextView fileMonitor;
 
-    private String url = "http://10.66.31.47:8080/task";
+    private String url = "http://10.66.31.47:8090/task";
     private AssetManager assetManager;
     private OkHttpClient client;
     private String fileContent;
@@ -36,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        client = new OkHttpClient();
+        client = new OkHttpClient().newBuilder().readTimeout(3000, TimeUnit.SECONDS).build();
         display = (TextView) findViewById(R.id.display);
         uploadBtn = (Button) findViewById(R.id.button);
         uploadBtn.setOnClickListener(new View.OnClickListener() {
@@ -69,12 +70,14 @@ public class MainActivity extends AppCompatActivity {
                 .build();
 
         Response response = null;
+        String result = null;
         try {
             response = client.newCall(request).execute();
+            result = response.body().string();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return response.body().toString();
+        return result;
     }
 
     private String loadKmeansData(Context context){
